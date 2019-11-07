@@ -1,10 +1,10 @@
 import os
-
+import time
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-os.environ["PATH"] += os.pathsep + r'C:\Users\Администратор'
+os.environ["PATH"] += os.pathsep + r'C:\Users\m.zasetskii\Webdrivers'
 from selenium import webdriver
 
 
@@ -14,38 +14,48 @@ class Application:
         self.wd.implicitly_wait(5)
         self.wd.get("http://10.201.48.25:8080/inrights")
 
-
     def login(self, username, password):
-        self.if_element_clickable_by_name('login').click()
-        self.if_element_clickable_by_name('login').send_keys(username)
-        self.if_element_clickable_by_name('password').click()
-        self.if_element_clickable_by_name('password').send_keys(password)
-        self.if_element_clickable_by_xpath("//a[contains(@id, 'button')and contains(@role,'button') and contains(@class, 'x-btn btn-login btn-radius-3 x-unselectable x-box-item x-btn-default-medium')and contains(@aria-hidden, 'false')]").click()
+        while self.__if_element_clickable_by_name('login').get_attribute("value") != username:
+            self.__if_element_clickable_by_name('login').click()
+            self.__if_element_clickable_by_name('login').clear()
+            self.__if_element_clickable_by_name('login').send_keys(username)
+        self.__if_element_clickable_by_name('password').click()
+        self.__if_element_clickable_by_name('password').send_keys(password)
+        self.__if_element_clickable_by_xpath("//a[contains(@id, 'button')and contains(@role,'button') and contains(@class, 'x-btn btn-login btn-radius-3 x-unselectable x-box-item x-btn-default-medium')and contains(@aria-hidden, 'false')]").click()
 
-    def open_users_page(self):
+    def navigate_to_submenu_element(self, elementid, submenu_title):
+        menu_element_number = self.__menu_element_number
+        if_element_clickable_by_xpath = self.__if_element_clickable_by_xpath
+
+        menu_element_number(elementid).click()
+        if_element_clickable_by_xpath('//a[.//*[contains(text(), "' + submenu_title + '")]]').click()
+
+    def click_on_button_in_toolbar_by_id(self, index):
         wd = self.wd
-        menu_element_number = self.menu_element_number
-        if_element_clickable_by_xpath = self.if_element_clickable_by_xpath
-        actions = ActionChains(wd)
+        element = wd.find_elements_by_xpath("//a[contains(@class, 'x-btn x-unselectable x-box-item x-toolbar-item x-btn-default-toolbar-medium')]")
+        element[index].click()
 
-        menu_element_number(2).click()
-        if_element_clickable_by_xpath('//a[.//*[contains(text(), "Пользователи")]]').click()
-        if_element_clickable_by_xpath('//a[./asdext(), "Пользователи")]]').click()
+    def new_user_name(self):
+        self.navigate_to_submenu_element(2, "Пользователи")
+        element = self.wd.find_elements_by_xpath("//*[contains(@class,'x-column-header-text-inner')]")
+        element[0].click()
+        #time.sleep(1)
+        self.__if_element_clickable_by_xpath("//tr[contains(@class,'x-grid-row')]").click()
+        #print(self.wd.find_elements_by_xpath("//tr[contains(@class,'x-grid-row')]//a[contains(@class, 'click-link ')]")[0].get_attribute("text"))
 
-
-    def if_element_clickable_by_name(self, locator):
+    def __if_element_clickable_by_name(self, locator):
         wd = self.wd
-        wait = WebDriverWait(wd, 5)
+        wait = WebDriverWait(wd, 10)
         element = wait.until(EC.element_to_be_clickable((By.NAME, locator)))
         return element
 
-    def if_element_clickable_by_xpath(self, locator):
+    def __if_element_clickable_by_xpath(self, locator):
         wd = self.wd
-        wait = WebDriverWait(wd, 5)
+        wait = WebDriverWait(wd, 10)
         element = wait.until(EC.element_to_be_clickable((By.XPATH, locator)))
         return element
 
-    def menu_element_number(self, index):
+    def __menu_element_number(self, index):
         wd = self.wd
         menu_element_user = wd.find_elements_by_xpath("//*[contains(@class,'app-menu')]//a")
         return menu_element_user[index]
@@ -53,3 +63,4 @@ class Application:
     def destroy(self):
         wd = self.wd
         wd.quit()
+        wd.find_element(By.ID, 'ad').find_element_by_name()
