@@ -63,4 +63,3 @@ class Application:
     def destroy(self):
         wd = self.wd
         wd.quit()
-        wd.find_element(By.ID, 'ad').find_element_by_name()
